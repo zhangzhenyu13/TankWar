@@ -3,12 +3,14 @@
 #include"MapData.h"
 #include"windows.h"
 class Map :public GraphicUnit{
-	HDC& hdc;
-	MapData* _map;
+	HWND& hWnd;
+	HINSTANCE& hInst;
+	MapData1* _map;
 public:
-	Map(HDC& hdc1):hdc(hdc1) {}
+	Map(HINSTANCE& hInst1,HWND& hWnd1):hWnd(hWnd1),hInst(hInst1) {}
 	virtual void draw();
-protected:
-	virtual void readData(GameData&) {
+
+	virtual void readData(GameData& _map1) {
+		_map = (MapData1*)&_map1;
 	}
 };

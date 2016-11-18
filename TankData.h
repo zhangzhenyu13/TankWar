@@ -1,59 +1,101 @@
 #pragma once
 #include"GameData.h"
+#include"Direction.h"
+#include<windows.h>
 class TankData :public GameData {
 	TankData* _tank;
-	char direction, firedirection;
-	int posfire[2];
+	Direction gesdirect,movedirect;
+	
 	int posx, posy;
-	int fireflag;
+	std::string tankname;
 public:
 	TankData() {
-		direction = 'u';
-		firedirection = 'u';
+		gesdirect = UP;
+		movedirect = KEEP;
 		posx = 500;
 		posy = 500;
-		fireflag = 0;
+		
 	}
-	virtual GameData* ReadData() {
+	POINT fire() {
+	switch(gesdirect){
+	case UP:
+		return { posx + 25,posy };
+		break;
+	case DOWN:
+		return{posx+25,posy+50};
+		break;
+	case LEFT:
+		return{ posx,posy + 25 };
+		break;
+	case RIGHT:
+		return{ posx + 50,posy + 25 };
+		break;
+	default://this must be avoid in the func
+		return {posx,posy};
+		break;
+	}
+	}
+	std::string getName() {
+		return tankname;
+	}
+	//test code
+	
+	void stepback() {
+#define Step -5		
+		switch (movedirect)
+		{
+		case UP:
+			posy -= Step;
+			break;
+		case DOWN:
+			posy += Step;
+			break;
+		case LEFT:
+			posx -= Step;
+			break;
+		case RIGHT:
+			posx += Step;
+			break;
+		default:
+			break;
+		}
+#undef Step 
+	}
+	void tankPos(Direction d) {
+#define Step 5		
+		switch (d)
+		{
+		case UP:
+			posy -= Step;
+			break;
+		case DOWN:
+			posy += Step;
+			break;
+		case LEFT:
+			posx -= Step;
+			break;
+		case RIGHT:
+			posx += Step;
+			break;
+		default:
+			break;
+		}
+#undef Step 
+		if (d != KEEP)
+			gesdirect=movedirect = d;
 
-		return _tank;
 	}
-	virtual void WriteData(GameData&) {}
-	int getposx() {
+	//position 
+	int Xpos() {
 		return posx;
 	}
-	int getposy() {
+	int Ypos() {
 		return posy;
 	}
-	void changeposx(int x) {
-		posx = x;
+	Direction gesDirect() {
+		return gesdirect;
 	}
-	void changeposy(int y) {
-		posy = y;
-	}
-	char getdirection() {
-		return direction;
-	}
-	void changedirect(char direct) {
-		direction = direct;
-	}
-	int getfireflag() {
-		return fireflag;
-	}
-	void changefireflag(int flag) {
-		fireflag = flag;
-	}
-	char getfiredirect() {
-		return firedirection;
-	}
-	void changefiredirect() {
-		firedirection = direction;
-	}
-	int* getfirepos() {
-		return posfire;
-	}
-	void writeposfire(int x, int y) {
-		posfire[0] = x;
-		posfire[1] = y;
+	Direction moveDirect() {
+		return movedirect;
 	}
 };

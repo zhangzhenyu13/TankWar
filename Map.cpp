@@ -1,38 +1,33 @@
 #include"Map.h"
-#include<windows.h>
-#include"resource.h"
 void Map::draw() {
-	HDC hdc = GetDC(hWnd);
-
-	//
 	
-	//
-	HBITMAP hbmp,hbmp1;
-	BITMAP bmp,bmp1;
-	HDC hmem,hmem1;
+	HBITMAP hbmp1,hbmp2;//handle bmp
+	BITMAP bmp1,bmp2;//info of bmp
 
-	hmem = CreateCompatibleDC(hdc);
-	hbmp = LoadBitmap(hInst, MAKEINTRESOURCE(NORMAL_BRICK));
-	hbmp1 = LoadBitmap(hInst, MAKEINTRESOURCE(BONUS_BRICK));
-	
+	HDC hmem = CreateCompatibleDC(*pDC);//current dc
+
+	hbmp1 = LoadBitmap(*pInst, MAKEINTRESOURCE(NORMAL_BRICK));//load resource with hbmp
+	hbmp2 = LoadBitmap(*pInst, MAKEINTRESOURCE(BONUS_BRICK));
 	GetObject(hbmp1,sizeof(BITMAP),&bmp1);
-	GetObject(hbmp, sizeof(BITMAP), &bmp);
-	RECT crect;
-	GetClientRect(hWnd, &crect);
-	int x=1, y=1;
-	RECT rect;
-	SelectObject(hmem, hbmp1);
+	GetObject(hbmp2, sizeof(BITMAP), &bmp2);
+
+	HGDIOBJ hOldSel;
+	hOldSel=SelectObject(hmem, hbmp1);
 	
+	RECT rect;
 	for (int i = 0; i < _map->size(); i++) {
 		if (_map->getPos(i).style == 1) {
-			SelectObject(hmem,hbmp);
+			SelectObject(hmem,hbmp1);
 			rect = _map->getPos(i).rect;
-			StretchBlt(hdc, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top,
-				hmem, 0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY);
+			StretchBlt(*pDCObj, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top,//copy data between dc
+				hmem, 0, 0, bmp1.bmWidth,bmp1.bmHeight,SRCCOPY);
 		}
 		
 	}
-	DeleteObject(hbmp);
+
+	//release Mem
 	DeleteObject(hbmp1);
-	ReleaseDC(hWnd, hdc);
+	DeleteObject(hbmp2);
+	DeleteObject(hOldSel);
+	DeleteDC(hmem);
 }

@@ -1,38 +1,37 @@
 #include"Tank.h"
-#include"resource.h"
+#include<TChar.h>
+using namespace Gdiplus;
+using namespace std;
 void Tank::draw() {
+	string s;
+	LPWSTR up = L"tank\\tank_up.png", down = L"tank\\tank_down.png",
+		left = L"tank\\tank_left.png", right = L"tank\\tank_right.png",pic=up;
 	
-	HDC hdc = GetDC(hWnd);
-	
-	
-	//
-	readData(*_tank);
-	
-	//
-	HBITMAP hbmp;
-	BITMAP bmp;
-	HDC hmem;
-	
-	hmem = CreateCompatibleDC(hdc);
-	hbmp = LoadBitmap(hInst,MAKEINTRESOURCE(MY_TANK));
-	SelectObject(hmem,hbmp);
-	GetObject(hbmp,sizeof(BITMAP),&bmp);
-	if(_tank->getfireflag()) {
-		RECT crect;
-		GetClientRect(hWnd, &crect);
-		int *pos = _tank->getfirepos();
-		if(pos[0]<crect.left || pos[0]>crect.right || pos[1]<crect.top || pos[1]>crect.bottom)
-			_tank->changefireflag(0);
-		else
-			Ellipse(hdc,pos[0]-2,pos[1]-2,pos[0]+2,pos[1]+2);
+	switch (_tank->gesDirect())
+	{
+	case UP:
+		pic = up;
+		break;
+	case DOWN:
+		pic = down;
+		break;
+	case LEFT:
+		pic = left;
+		break;
+	case RIGHT:
+		pic = right;
+		break;
+	default:
+		break;
 	}
-	RECT myrect;
-	myrect.bottom = _tank->getposy()+10;
-	myrect.left = _tank->getposx()-10;
-	myrect.right = _tank->getposx()+10;
-	myrect.top = _tank->getposy()-10;
-	StretchBlt(hdc,myrect.left,myrect.top,myrect.right-myrect.left,myrect.bottom-myrect.top,
-		hmem,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY);
-	DeleteObject(hbmp);
-	ReleaseDC(hWnd,hdc);
+
+	Image tank(pic);
+	Graphics g(*pDCObj);
+
+	Rect rect(_tank->Xpos(),_tank->Ypos(),50,50);
+	
+	g.DrawImage(&tank, rect);
+
+	//release Mem
+
 }

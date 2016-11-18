@@ -1,6 +1,8 @@
 #pragma once
+#include<string>
 class GameData{
 public :
-	virtual GameData* ReadData() = 0;
-	virtual void WriteData(GameData&) = 0;
+	virtual std::string getName() = 0;
+	virtual GameData* ReadData() { return NULL; };
+	virtual void WriteData(GameData&) {};
 };

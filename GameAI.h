@@ -6,13 +6,19 @@
 #include"TankData.h"
 #include"MapData.h"
 #include"Bullet.h"
+#include"Robot.h"
 #include<vector>
+enum GameResult
+{
+	WINNER,LOSER
+};
 class GameAI {
 private:
 	char stage;
 	std::vector<TankData*> tank;
 	std::vector<MapData*> map;
 	std::vector<Control*> control;
+	std::vector<Robot*> player;
 	std::vector<Bullet*> fire;
 	GraphicLayout* glayout;
 public :
@@ -23,7 +29,10 @@ public :
 	void addControl(Control* C) {
 		control.push_back(C);
 	}
-	virtual void Handle(bool timer=false);
+	void addPlayer(Robot* rb){
+		player.push_back(rb);
+	}
+	virtual GameResult Handle(bool timer=false);
 	void addMap(MapData* gm) {
 		map.push_back(gm);
 	}
@@ -34,7 +43,49 @@ public :
 		fire.push_back(gb);
 	}
 	//
+	void BeginGame(){
+		player.pop_back();
+		for(int i=0;i<player.size();i++){
+			player[i]->ShareData(map[stage-1],&tank);
+		}
+	}
+	~GameAI(){
+		for(int i=tank.size()-1;i>=0;i--){
+			delete tank[i];
+		}
+		for(int i=map.size()-1;i>=0;i--){
+			delete map[i];
+		}
+		for(int i=control.size()-1;i>=0;i--){
+			delete control[i];
+		}
+		for(int i=player.size()-1;i>=0;i--){
+			delete player[i];
+		}
+	}
+	POINT properPos(RECT Area){
+		POINT p;
+		RECT rect;
+		bool flag;
+		do {
+			flag = false;
+			p.x = rand()%(Area.right-Area.left);
+			p.y = rand()%(Area.bottom-Area.top);
+			rect.bottom = p.y + 50;
+			rect.left = p.x;
+			rect.right = p.x + 50;
+			rect.top = p.y;
+			RECT inrect;
+			for(int j = 0; j < tank.size(); j++) {
+				RECT trect = {tank[j]->Xpos(), tank[j]->Ypos(), tank[j]->Xpos()+50, tank[j]->Ypos()+50};
+				if (IntersectRect(&inrect,&trect,&rect))
+					flag = true;
+			}
+		} while(map[stage-1]->interset(rect) || flag);
+		return p;
+	}
 protected:
 	void fireMove();
 	void tankMove();
+
 };

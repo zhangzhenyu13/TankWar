@@ -17,3 +17,5 @@
 #include"Control.h"
 #include"GameAI.h"
 
+#include"TankFactory.h"
+#include"Robot.h"

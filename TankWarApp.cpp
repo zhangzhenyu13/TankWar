@@ -8,52 +8,65 @@ GameInput-->GameAIHandle-->GameDraw
 in WndProc as
 case WM_PAINT, case WM_KEYDOWN
 */
-ULONG_PTR m_gdiplusToken;
 
+static TankFactory tkfc;
 static HINSTANCE hInst;
 static Control* Input;
+static std::vector<Control*> options;
+static Robot* robot;
+
 static TankData* tankData;
 static MapData* mapData;
 static GameAI* RuleAI;
 static GraphicUnit *tank, *map;
 static GraphicLayout* Layout;
 BOOLEAN InitData(HWND& hWnd) {
-//M&C Init
-	Input = new Control();
-	mapData = new MapData1();
-	tankData = new TankData();
+	Layout = new GraphicLayout(hWnd, hInst);
 	RuleAI = new GameAI();
+//map
+	mapData = new MapData1();
 	RuleAI->addMap(mapData);
-	RuleAI->addTank(tankData);
-	RuleAI->addControl(Input);
-//V Init
-	Layout = new GraphicLayout(hWnd,hInst);
-	tank = new Tank();
 	map = new Map();
-	tank->readData(tankData);
 	map->readData(mapData);
 	Layout->addGraphicUnit(map);
-	Layout->addGraphicUnit(tank);
-	Layout->Init();
+//tank	
+	RECT rctA={0,300,1200,700};
+	for (int i = 0; i < 15; i++) {
+		tankData = tkfc.Retrieve(RuleAI->properPos(rctA));
+		Input = new Control();
+		robot=new Robot();
+		options.push_back(Input);
+		
+		RuleAI->addPlayer(robot);
+		RuleAI->addTank(tankData);
+		RuleAI->addControl(Input);
+		//
+		tank = new Tank();
+		tank->readData(tankData);
+		Layout->addGraphicUnit(tank);
+	}
+	//for man's control
+	//options.pop_back();
+	//players.pop_back();
 
+//	
+	Layout->Init();
 	RuleAI->setGraph(Layout);
-//
-     Gdiplus::GdiplusStartupInput GdiplusStartupInput;
-     Gdiplus::GdiplusStartup(&m_gdiplusToken, &GdiplusStartupInput, NULL);
+//gamestart
+	RuleAI->BeginGame();
+
 	return TRUE;
 }
 
 
 BOOLEAN Release() {
-	Gdiplus::GdiplusShutdown(m_gdiplusToken);
+	
 	//releasedata
-	delete Input;
+
 	delete RuleAI;
-	delete mapData;
-	delete tankData;
+
 	delete Layout;
-	delete tank;
-	delete map;
+
 	return TRUE;
 }
 BOOLEAN InitWindowClass(HINSTANCE hInstance, int nCmdShow);
@@ -72,6 +85,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+	
 	Release();
 	return (int)msg.wParam;
 }
@@ -82,7 +96,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
-		SetTimer(hWnd,1,10,NULL);
+		SetTimer(hWnd,1,20,NULL);
 		break;
 	case WM_PAINT:
 		Layout->RefreshWnd(hWnd);
@@ -91,16 +105,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_KEYDOWN:
 		Input->Input(wParam);
-		RuleAI->Handle();
-		InvalidateRect(hWnd,NULL,FALSE);
+		//RuleAI->Handle();
+		//InvalidateRect(hWnd,NULL,FALSE);
 		break;
 	case WM_KEYUP:
-		Input->keep();
-		RuleAI->Handle();
-		InvalidateRect(hWnd, NULL, FALSE);
+		Input->Keep();
+		//RuleAI->Handle();
+		//InvalidateRect(hWnd, NULL, FALSE);
+		break;
 	case WM_TIMER:
 		//flash
-		RuleAI->Handle(true);
+		
+		for(int i=0;i<options.size();i++)
+			options[i]->CoolDown();
+	//	for(int i=0;i<players.size();i++)
+	//		options[i]->Input(players[i]->getNextAct());
+		if(RuleAI->Handle()==LOSER){
+			MessageBox(NULL,L"GAME OVER",L"TIPS",MB_OK);
+		    SendMessage(hWnd,WM_DESTROY,wParam,lParam);
+		}
 		InvalidateRect(hWnd,NULL,FALSE);
 		break;
 	
@@ -119,8 +142,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_DESTROY:
-		PostQuitMessage(0);
 		KillTimer(hWnd,1);
+		PostQuitMessage(0);
+		
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);

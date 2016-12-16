@@ -10,7 +10,7 @@
 #include<vector>
 enum GameResult
 {
-	WINNER,LOSER
+	WINNER,LOSER,COMEON
 };
 class GameAI {
 private:
@@ -42,13 +42,10 @@ public :
 	void addBullet(Bullet *gb) {
 		fire.push_back(gb);
 	}
+
 	//
-	void BeginGame(){
-		player.pop_back();
-		for(int i=0;i<player.size();i++){
-			player[i]->ShareData(map[stage-1],&tank);
-		}
-	}
+	void BeginGame();
+	void EndGame();
 	~GameAI(){
 		for(int i=tank.size()-1;i>=0;i--){
 			delete tank[i];
@@ -69,8 +66,8 @@ public :
 		bool flag;
 		do {
 			flag = false;
-			p.x = rand()%(Area.right-Area.left);
-			p.y = rand()%(Area.bottom-Area.top);
+			p.x = rand()%(Area.right-Area.left)+Area.left;
+			p.y = rand()%(Area.bottom-Area.top)+Area.top;
 			rect.bottom = p.y + 50;
 			rect.left = p.x;
 			rect.right = p.x + 50;
@@ -78,13 +75,30 @@ public :
 			RECT inrect;
 			for(int j = 0; j < tank.size(); j++) {
 				RECT trect = {tank[j]->Xpos(), tank[j]->Ypos(), tank[j]->Xpos()+50, tank[j]->Ypos()+50};
-				if (IntersectRect(&inrect,&trect,&rect))
+				if (tank[j]->isAlive()&&IntersectRect(&inrect,&trect,&rect))
 					flag = true;
 			}
 		} while(map[stage-1]->interset(rect) || flag);
 		return p;
 	}
 protected:
+	int countLevel(){
+		StatusWnd* swnd=glayout->Status();
+		swnd->clear();
+		for(int i=0;i<tank.size();i++){
+			if(tank[i]->isAlive())
+			swnd->add(tank[i]->getTeam(),tank[i]->getLevel());
+		}
+		
+		
+		if(swnd->Sum(1)==0)
+			return 1;
+		else if(swnd->Sum(2)==0)
+			return 2;
+		else
+			return 0;
+
+	}
 	void fireMove();
 	void tankMove();
 

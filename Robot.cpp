@@ -1,6 +1,9 @@
 #include"Robot.h"
 
+
+
 int Robot::hcode=0;
+
 WPARAM Robot::AI1(){
 		srand(time(NULL)%11110123+num);
 
@@ -26,7 +29,7 @@ WPARAM Robot::AI1(){
 		return K;
 
 	}
-	WPARAM Robot::AI2(){
+WPARAM Robot::AI2(){
 		
 		std::vector<TankData*> tank = *_tank;
 		if(!tank[num]->isAlive())
@@ -124,3 +127,46 @@ WPARAM Robot::AI1(){
 			break;
 		}
 	}
+WPARAM Robot::AI3(){
+	RECT rt,t1,t2;
+	TankData* nearTank=nullptr;
+	int dx,dy,Xdis=10000,Ydis=10000;
+	std::vector<TankData*>& tank=*_tank;
+	for(int i=0;i<tank.size();i++){
+		if(i!=num&&tank[i]->getTeam()!=tank[num]->getTeam()){
+			t1=tank[i]->getPos();
+			t2=tank[num]->getPos();
+			if(IntersectRect(&rt,&t1,&tank[num]->viewArea())){
+				dx=(t1.left-t2.left);
+				dy=(t1.top-t2.top);
+				
+				if(abs(dx)<Xdis){
+					Xdis=abs(dx);
+					if(dx>0&&tank[num]->gesDirect()==RIGHT)
+						return VK_SPACE;
+					else if(dx<0&& tank[num]->gesDirect()==LEFT)
+						return VK_SPACE;
+					else if(dx<0&&tank[num]->gesDirect()==RIGHT)
+						return VK_LEFT;
+					else if(dx>0&&tank[num]->gesDirect()==LEFT)
+						return VK_RIGHT;
+
+				}
+				if(abs(dy)<Ydis){
+					Ydis=abs(dy);
+					if(dy>0&&tank[num]->gesDirect()==DOWN)
+						return VK_SPACE;
+					else if(dy<0&& tank[num]->gesDirect()==UP)
+						return VK_SPACE;
+					else if(dy<0&&tank[num]->gesDirect()==DOWN)
+						return VK_UP;
+					else if(dy>0&&tank[num]->gesDirect()==UP)
+						return VK_DOWN;
+				}
+					
+
+			}
+		}
+	}
+	return AI1();
+}

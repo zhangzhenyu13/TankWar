@@ -4,22 +4,42 @@
 #include"Map.h"
 #include"StatusWnd.h"
 #include<stack>
+#include<string>
 using namespace std;
 #define Stack stack<TankData*>
 
 
 
 void GameAI::BeginGame(){
-    player.pop_back();
+	glayout->showStartUP = false;
 		for(int i=0;i<player.size();i++){
-			player[i]->ShareData(map[stage-1],&tank);
+			player[i]->ShareData(map,&tank);
 		}
+		player[playerRank]->enabled = false;
+		//int tanks on screen
+		for (int i = 0,j1=0,j2=0;i < tank.size(); i++) {
+			if (tank[i]->isAlive() == false)
+				continue;
+			if (tank[i]->getTeam() == 1 && j1<onShow) {
+				tank[i]->available = true;
+				j1++;
+			}
+			else if(tank[i]->getTeam()==2&&j2<onShow){
+				tank[i]->available = true;
+				j2++;
+				
+			}
+			else;
+		}
+		
 }
 GameResult GameAI::Handle(bool timer) {
 	//robots input imitate
-	for(int i=0;i<player.size();i++){
-		if(tank[i]->isAlive())
-			control[i]->Input(player[i]->getNextAct(1));
+	for (int i = 0; i<tank.size(); i++) {
+		if (tank[i]->isAlive() && tank[i]->available) {
+			if (i != playerRank)
+				control[i]->Input(player[i]->getNextAct(level));
+		}
 		else
 			control[i]->Keep();
 	}
@@ -48,13 +68,12 @@ GameResult GameAI::Handle(bool timer) {
 //
 void GameAI::tankMove() {
 	RECT rt;
-	MapData* map1 = map[stage-1];//currrent stage
 
 //actions
 	for (int i = 0;i<tank.size(); i++) {
 		Control* C = control[i];
 		TankData* tank1 = tank[i];
-		if(tank1->isAlive()==false)
+		if(tank1->isAlive()==false||tank1->available==false)
 			continue;
 		tank1->tankPos((C->Move()));
 		
@@ -63,7 +82,6 @@ void GameAI::tankMove() {
 			fire.push_back(b);
 			glayout->addGraphicUnit(b);
 		    }
-		
 	/*	for(int j=i+1;j<tank.size();j++)
 	        if(tank[i]->isAlive()&&tank[j]->isAlive()&IntersectRect(&rt,&tank[j]->getPos(),&tank[i]->getPos())) {
 				int Xdis = abs(tank[i]->Xpos() - tank[j]->Xpos()), Ydis = abs(tank[i]->Ypos() - tank[j]->Ypos());
@@ -94,10 +112,13 @@ void GameAI::tankMove() {
 		Stack S;
 		for(int i=0;i<tank.size();i++){
 			bool coll=false;
-			if(tank[i]->isAlive()==false||tank[i]->moveDirect()==KEEP)
+			if(tank[i]->isAlive()==false||
+				tank[i]->moveDirect()==KEEP||
+				tank[i]->available==false)
 				continue;
 			for(int j=0;j<tank.size();j++)
-				if(j!=i&&tank[j]->isAlive()&&IntersectRect(&rt,&tank[i]->getPos(),&tank[j]->getPos())){
+				if(j!=i&&tank[j]->isAlive()&&tank[j]->available&&
+					IntersectRect(&rt,&tank[i]->getPos(),&tank[j]->getPos())){
 					coll=true;
 					
 					break;
@@ -113,11 +134,11 @@ void GameAI::tankMove() {
 		}
 //tanks and map
 		for(int i=0;i<tank.size();i++){
-			if(tank[i]->isAlive()==false)
+			if(tank[i]->isAlive()==false||tank[i]->available==false)
 				continue;
-		    int x = tank[i]->Xpos(), y = tank[i]->Ypos();
-		    RECT rect = { x,y,x + 50,y + 50 };
-			if(map1->interset(rect)){
+		   // int x = tank[i]->Xpos(), y = tank[i]->Ypos();
+		    RECT rect = tank[i]->getPos();
+			if(map->interset(rect)){
 				
 				tank[i]->stepback();
 			}
@@ -125,7 +146,7 @@ void GameAI::tankMove() {
 }
 //
 void GameAI::fireMove() {
-	MapData* map1 = map[stage-1];//current stage
+	//current stage
 	std::vector<Bullet*>::iterator it=fire.begin();
 	RECT rt;
 	BOOLEAN hitOn;
@@ -135,13 +156,13 @@ void GameAI::fireMove() {
 		RECT bulletrect = { fire[i]->Xpos()- 2, fire[i]->Ypos() - 2, 
 			               fire[i]->Xpos() + 2, fire[i]->Ypos() + 2 };
 		//map bricks
-		for (int j = 0; j < map1->size(); j++) {
-			Brick brick = map1->getPos(j);
+		for (int j = 0; j < map->size(); j++) {
+			Brick brick = map->getPos(j);
 
 			if (IntersectRect(&rt, &brick.rect, &bulletrect)) {
 
 				//try to delete the brick
-				 map1->deleteBrick(j, fire[i]->power());
+				 map->deleteBrick(j, fire[i]->power());
 				//delete the bullet
 				glayout->deleteGraphicUnit(fire[i]);
 				it = fire.begin() + i;
@@ -154,11 +175,16 @@ void GameAI::fireMove() {
 			continue;
 	//hit other tanks
 		for(int j=0;j<tank.size();j++){
-			if(tank[j]->isAlive()&&tank[j]->getTeam()!=fire[i]->getTeam()&&IntersectRect(&rt,&tank[j]->getPos(),&bulletrect)){
+			if(tank[j]->isAlive()&&tank[j]->available&&
+				tank[j]->getTeam()!=fire[i]->getTeam()&&
+				IntersectRect(&rt,&tank[j]->getPos(),&bulletrect)){
 				//
-				tank[j]->HitByBullet(fire[i]->power());
+				if(tank[j]->HitByBullet(fire[i]->power()))
+					if(j==playerRank)
+						playerdied=true;
 				
 				//
+				fire[i]->hitTank = true;
 				glayout->deleteGraphicUnit(fire[i]);
 				it=fire.begin()+i;
 				fire.erase(it);
@@ -177,3 +203,21 @@ void GameAI::fireMove() {
 
 }
 
+void GameAI::SaveData(wstring filename) {
+	wfstream file;
+	file.open(filename);
+	file.seekg(20, ios::beg);
+	for (int i = 0; i < tank.size(); i++) {
+		if (tank[i]->isAlive()) {
+			file << tank[i]->Xpos() << " " << tank[i]->Ypos() << " "
+				<< (int)tank[i]->getTeam() << " " << (int)tank[i]->getLevel() << endl;
+		}
+	}
+	file << 11457680 << endl;
+	file << map->size() - 4 << endl;
+	for (int i = 4; i < map->size(); i++) {
+		file << map->getPos(i).rect.left << " " << map->getPos(i).rect.top << " "
+			<< (int)map->getPos(i).style << " " << map->getPos(i).health << endl;
+	}
+	file << (int)level << endl;
+}

@@ -1,43 +1,22 @@
-#include"GraphicLayout.h"
+#pragma once
+#include<windows.h>
 
-using namespace std;
+#include<string>
+#include"GameData.h"
 
-void GraphicLayout::draw() {
-	PAINTSTRUCT ps;
-	HBRUSH bkbrush = CreateSolidBrush(RGB(0,10,0));
-	RECT crect;
-	GetClientRect(pWnd, &crect);
-
-	HDC hdc = BeginPaint(pWnd, &ps);
-	HDC hmem = CreateCompatibleDC(hdc);
-
-	HBITMAP hMbmp=CreateCompatibleBitmap(hdc, crect.right - crect.left, crect.bottom - crect.top);
-	HGDIOBJ hOldSel=
-	SelectObject(hmem,hMbmp);
-	
-	SelectObject(hmem,bkbrush);
-	//SelectObject(hdc,bkbrush);
-	
-	
-	//start drawing
-	FillRect(hmem, &crect, bkbrush);
-	for (int i = 0; i < data.size(); i++) {
-		data[i]->setDC(&hdc,&hmem);
-		data[i]->draw();
-	}
-	
-	
-	BitBlt(hdc,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,hmem,0,0,SRCCOPY);
-	
-
-	EndPaint(pWnd, &ps);
-
-	DeleteObject(bkbrush);
-	DeleteObject(hMbmp);
-	
-	SelectObject(hmem, hOldSel);
-	DeleteDC(hmem);
-	
-	ReleaseDC(pWnd,hdc);
-	
-}
+#include"resource.h"
+#include"Direction.h"
+//GDI
+#include<gdiplus.h>
+#pragma comment(lib,"gdiplus.lib")
+#include <comdef.h>
+class GraphicUnit {
+public:
+	virtual void draw()=0;
+	virtual void readData(GameData*) = 0;
+	virtual GameData* getData() { return NULL; }
+	virtual std::string getName()=0;
+	virtual void setDC(HDC*,HDC*) = 0;
+	virtual void setHandle(HWND* hWnd,HINSTANCE* hInst) = 0;
+	virtual ~GraphicUnit(){}
+};

@@ -6,21 +6,27 @@
 
 class Robot{
 private:
-	static int hcode;
+	
 	MapData* _map;
 	std::vector<TankData*>* _tank;
 	int num;
 protected:
 	WPARAM AI1();
 	WPARAM AI2();
+	WPARAM AI3();
 public:
-	Robot():num(hcode++){}
+	static int hcode;
+	bool enabled;
+	Robot():num(hcode++),enabled(true){}
 	WPARAM getNextAct(int k=1){
-		if(k==1)
+		if (k == 1)
 			return AI1();
-		if(k==2)
+		else if (k == 2)
 			return AI2();
-		
+		else if (k == 3)
+			return AI3();
+		//default
+		return AI1();
 	}
 	void ShareData(MapData* map,std::vector<TankData*>* tank){
 		_map=map;

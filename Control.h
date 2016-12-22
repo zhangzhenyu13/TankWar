@@ -1,43 +1,81 @@
 #pragma once
 #include<windows.h>
 #include"Direction.h"
+#include"StateMachine.h"
 //
 class Control {
 	Direction direct;
-	int bullet;
+	bool isfire;
+	char firecooling,movecooling;
+	TankAct tAct;
 public:
-	Control():direct(KEEP),bullet(0) {}
-	virtual int Fire() {
-		return bullet;
+	Control():direct(KEEP),isfire(0),firecooling(0),movecooling(0) {}
+	//opt
+	virtual TankAct& getAct(){
+		tAct.direct=direct;
+		tAct.fire=isfire;
+		return tAct;
 	}
+	virtual int Fire() {
+		int b1;
+		if (firecooling > 0)
+			b1 = 0;
+		else{
+			if(isfire)
+			firecooling = 30;
+			b1=isfire;
+			isfire=0;
+		}
+
+		return b1;
+	}
+
 	virtual Direction Move() {
 		return direct;
 	}
-	void keep() { 
-		direct = KEEP; 
-		bullet = 0;
+	//input
+	virtual void InputF(WPARAM wParam){
+	//fire
+	if (wParam == VK_SPACE) 
+		isfire = 1;
 	}
-	virtual void Input(WPARAM wParam) {
-		direct = KEEP;
-		switch(wParam) {
-		case VK_DOWN:
-			direct = DOWN;
-			break;
-		case VK_LEFT:
-			direct = LEFT;
-			break;
-		case VK_UP:
-			direct = UP;
-			break;
-		case VK_RIGHT:
-			direct = RIGHT;
-			break;
-		default:
-			break;
+	virtual void InputM(WPARAM wParam) {
+		//move
+		//Direction d = direct;
+			switch (wParam) {
+			case VK_DOWN:
+				direct = DOWN;
+				break;
+			case VK_LEFT:
+				direct = LEFT;
+				break;
+			case VK_UP:
+				direct = UP;
+				break;
+			case VK_RIGHT:
+				direct = RIGHT;
+				break;
+			default:
+				break;
+			}
+	}
+	void Input(WPARAM wParam){
+		InputM(wParam);
+		InputF(wParam);
+	}
+	//cooling
+	void CoolDown() {
+		if (--firecooling > 0) {
+			isfire = 0;
 		}
-		if (wParam == VK_SPACE)
-			bullet = 1;
-		else
-			bullet = 0;
+		/*if (--movecooling <= 0) {
+			direct = KEEP;
+			movecooling = 0;
+		}*/
+		
+	}
+	//stop
+	void Keep() {
+		direct = KEEP;
 	}
 };

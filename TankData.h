@@ -1,32 +1,52 @@
 #pragma once
 #include"GameData.h"
 #include"Direction.h"
+#include"StateMachine.h"
 #include<windows.h>
 class TankData :public GameData {
 	TankData* _tank;
 	Direction gesdirect,movedirect;
 	char Step;
 	int posx, posy;
-	
+	bool isfire;
 	char health;
 	std::string tankname;
 	char group;
 	char level;
+	
 public:
+	int levelUPcooling;
+	bool available;
+	const int tankSize = 40;
 	RECT viewArea(){
 		RECT rect={posx-100,posy-100,posx+100,posy+100};
 		return rect;
 	}
+	TankData(int x, int y, int team, int newlevel) :Step(5) {
+		levelUPcooling = 0;
+		level = newlevel;
+		group = team;
+		health = 1;
+		gesdirect = UP;
+		movedirect = KEEP;
+		posx = x;
+		posy = y;
+		available = false;
+	}
 	TankData():Step(5) {
+		levelUPcooling = 0;
 		level=1;
 		group=1;
 		health=1;
 		gesdirect = UP;
 		movedirect = KEEP;
 		posx = 500;
-		posy = 500;		
+		posy = 500;	
+		available = false;
+		
 	}
 	TankData(POINT p):Step(5){
+		levelUPcooling = 0;
 		level=1;
 		group=1;
 		health=1;
@@ -34,22 +54,38 @@ public:
 		movedirect = KEEP;
 		posx = p.x;
 		posy = p.y;
+		available = false;
 	}
 	void setTeam(char gt){
 		group=gt;
 	}
 	char getTeam(){return group;}
-	void HitByBullet(char damage=1){
+	bool HitByBullet(char damage=1){//is the tank dead?
 		health-=damage;
-		
+		if (isAlive())
+			return false;
+		else
+		{
+			return true;
+		}
+	}
+	void acceptAct(TankAct& act){
+		movedirect=act.direct;
+		isfire=act.fire;
 	}
 	void LevelUp(){
+		static int levelStand=2,count=0;
 		if(level>=5)
 			return ;
+		if(++count>levelStand){
+			levelStand+=2;
+			count=0;
 		level++;
-		health++;
+		health=level;
 		if((1+level)%3==0)
 			Step++;
+		levelUPcooling = level * 400;
+		}
 	}
 	bool isAlive(){
 		if(health<=0)
@@ -61,23 +97,23 @@ public:
 	POINT p;
 	switch(gesdirect){
 	case UP:
-		p.x=posx + 25;
+		p.x=posx + tankSize/2;
 		p.y=posy;
 
 		break;
 	case DOWN:
-		p.x=posx+25;
-		p.y=posy+50;
+		p.x=posx+ tankSize / 2;
+		p.y=posy+ tankSize;
 	
 		break;
 	case LEFT:
 		p.x= posx;
-		p.y=posy + 25;
+		p.y=posy + tankSize / 2;
 	
 		break;
 	case RIGHT:
-		p.x=posx + 50;
-		p.y=posy + 25 ;
+		p.x=posx + tankSize;
+		p.y=posy + tankSize / 2;
 		
 		break;
 	default://this must be avoid in the func
@@ -179,7 +215,7 @@ public:
 		return posy;
 	}
 	RECT getPos(){
-		RECT rct={posx,posy,posx+50,posy+50};
+		RECT rct={posx,posy,posx+ tankSize,posy+ tankSize};
 		return rct;
 	}
 	Direction gesDirect() {

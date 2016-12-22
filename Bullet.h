@@ -1,21 +1,30 @@
 #pragma once
 #include"GraphicUnit.h"
-
+#include"TankData.h"
 class Bullet :public GraphicUnit{
-	
+	const char Step;
 	HDC* pDC, *pDCObj;
 	HWND* pWnd;
 	HINSTANCE* pInst;
 	int x, y;
 	Direction direct;
-	int style;
+	const int style;
+	const char group;
 	std::string bulletname;
+	TankData* owner;
 public:
+	bool hitTank = false;
 	std::string getName() { return bulletname; }
 	void readData(GameData* bullet) {
 		
 	}
-	Bullet(POINT p, Direction d, int style1 = 1) :x(p.x), y(p.y), direct(d), style(style1) {}
+	Bullet(TankData* owner1,POINT p, Direction d,char team=1, int style1 = 1) 
+		:owner(owner1),group(team),Step(10),x(p.x), y(p.y), direct(d), style(style1) {}
+	~Bullet(){
+		if(owner->isAlive()&&hitTank)
+		   owner->LevelUp();
+	}
+
 	void setDC(HDC*hdc1,HDC*hdc2) {
 		pDC = hdc1;
 		pDCObj = hdc2;
@@ -24,11 +33,12 @@ public:
 		pInst = hInst;
 		pWnd = hWnd;
 	}
-	int power() { return style*1.5; }
+	char getTeam(){return group;}
+	int power() { return style; }
 	int Xpos() { return x; }
 	int Ypos() { return y; }
 	void Move() {
-#define Step 6
+
 		switch (direct)
 		{
 		case UP:
@@ -48,7 +58,7 @@ public:
 			break;
 		default:
 			break;
-#undef Step
+
 		}
 	}
 	

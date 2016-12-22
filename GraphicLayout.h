@@ -3,21 +3,23 @@
 #include<vector>
 #include"GraphicUnit.h"
 #include"StatusWnd.h"
+#include"StartUpWnd.h"
 class GraphicLayout {
 private:
 	HWND pWnd;
 	HINSTANCE pInst;
 	std::vector<GraphicUnit*> data;
 	StatusWnd* status;
+	StartUpWnd* start;
 protected:
 	
 public:
+	bool showStartUP=true;
 	void RefreshWnd(HWND wnd) {
 		pWnd = wnd;
 	}
 	GraphicLayout(HWND wnd, HINSTANCE inst) :pWnd(wnd), pInst(inst) {}
 	void draw();
-	void drawStatus();
 	void Init() {
 		for (int i = 0; i < data.size(); i++) {
 			data[i]->setHandle(&pWnd, &pInst);
@@ -26,6 +28,9 @@ public:
 	StatusWnd* Status(){return status;}
 	void addGraphicUnit(GraphicUnit* g) {
 		data.push_back(g);
+	}
+	void addStartUp(StartUpWnd* startwnd) {
+		start = startwnd;
 	}
 	void addStatusZone(StatusWnd* stwnd){
 		status=stwnd;

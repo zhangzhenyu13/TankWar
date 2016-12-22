@@ -1,5 +1,5 @@
 #pragma once
-#include<windows.h>
+//#include<windows.h>
 #include"GameData.h"
 #include"GraphicUnit.h"
 #include"MapData.h"

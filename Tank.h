@@ -22,7 +22,9 @@ public:
 		return tankname;
 	}
 	virtual void draw();
-
+	virtual GameData* getData(){
+		return _tank;
+	}
 	virtual void readData(GameData* newtank) {
 		_tank = dynamic_cast<TankData*>(newtank);
 	}

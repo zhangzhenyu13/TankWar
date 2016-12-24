@@ -380,7 +380,212 @@ void MapData1::method2() {
 	}
 }
 
-void MapData1::method3() {}
+void MapData1::method3() {
+	Brick brick;
+	int x, y;
+	//”“–±
+	for (int i = 0; i < 11; i++) {
+		x = 250 + i * 50;
+		y = 550 - i * 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 11; i++) {
+		x = 350 + i * 50;
+		y = 600 - i * 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 2; i++) {
+		x = 250 + i * 50;
+		y = 600;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 2; i++) {
+		x = 800 + i * 50;
+		y = 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	//◊Û–±
+	for (int i = 0; i < 12; i++) {
+		if (i != 5 && i != 6) {
+			x = 300 + i * 50;
+			y = 50 + i * 50;
+			brick.rect = { x,y,x + 50,y + 50 };
+			brick.health = 5;
+			brick.style = 1;
+			data.push_back(brick);
+		}
+	}
+	for (int i = 0; i < 12; i++) {
+		if (i != 6 && i != 7) {
+			x = 200 + i * 50;
+			y = 50 + i * 50;
+			brick.rect = { x,y,x + 50,y + 50 };
+			brick.health = 5;
+			brick.style = 1;
+			data.push_back(brick);
+		}
+	}
+	for (int i = 0; i < 12; i++) {
+		if (i != 5 && i != 6) {
+			x = 250 + i * 50;
+			y = 50 + i * 50;
+			brick.rect = { x,y,x + 50,y + 50 };
+			brick.health = 5;
+			brick.style = 1;
+			data.push_back(brick);
+		}
+	}
+
+	//Home
+	for (int i = 0; i < 3; i++) {
+		x = 500 + i * 50;
+		y = 560;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 1; i++) {
+		x = 500;
+		y = 610 + i * 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 1; i++) {
+		x = 600;
+		y = 610 + i * 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+
+	//◊Û≤‡
+	for (int i = 0; i < 3; i++) {
+		x = 0 + i * 50;
+		y = 250;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 3; i++) {
+		x = 0 + i * 50;
+		y = 300;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 3; i++) {
+		x = 0 + i * 50;
+		y = 350;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 3; i++) {
+		x = 0 + i * 50;
+		y = 400;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+
+	//…œ≤‡
+	for (int i = 0; i < 4; i++) {
+		x = 450 + i * 50;
+		y = 0;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 4; i++) {
+		x = 450 + i * 50;
+		y = 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+
+	//”“≤‡
+	for (int i = 0; i < 4; i++) {
+		x = 1000;
+		y = 250 + i * 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 4; i++) {
+		x = 1050;
+		y = 250 + i * 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 4; i++) {
+		x = 1100;
+		y = 250 + i * 50;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 5;
+		brick.style = 1;
+		data.push_back(brick);
+	}
+
+	//Ã˙«Ω
+	for (int i = 0; i < 4; i++) {
+		x = 0 + i * 50;
+		y = 150;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 99;
+		brick.style = 3;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 4; i++) {
+		x = 0 + i * 50;
+		y = 500;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 99;
+		brick.style = 3;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 4; i++) {
+		x = 950 + i * 50;
+		y = 150;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 99;
+		brick.style = 3;
+		data.push_back(brick);
+	}
+	for (int i = 0; i < 4; i++) {
+		x = 950 + i * 50;
+		y = 500;
+		brick.rect = { x,y,x + 50,y + 50 };
+		brick.health = 99;
+		brick.style = 3;
+		data.push_back(brick);
+	}
+}
 
 void MapData1::generateMap(int r) {
 	MapData::generateMap(data);

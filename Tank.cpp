@@ -12,13 +12,18 @@ void Tank::draw() {
 	else
 		rba2 = _tank->levelUPcooling/10;
 	HBRUSH bkbrush = CreateSolidBrush(RGB(10 + rba1, 10 + rba2, 30));
+	HPEN bkpen = CreatePen(PS_DASHDOT,4,RGB(200,200,200));
 	RECT rt = _tank->getPos();
 	SelectObject(*pDCObj, bkbrush);
+	
 	if (_tank->levelUPcooling > 0) {
-	   Ellipse(*pDCObj, rt.left - 5, rt.top - 5, rt.right + 5, rt.bottom + 5);
+	   Ellipse(*pDCObj, rt.left - 10, rt.top - 10, rt.right + 10, rt.bottom + 10);
 	   _tank->levelUPcooling-=10;
     }
-		
+	if (_tank->isPlayer) {
+		SelectObject(*pDCObj, bkpen);
+		Ellipse(*pDCObj, rt.left - 5, rt.top - 5, rt.right + 5, rt.bottom + 5);
+	}
 	//GdiplusImage
 	wstring tankges;
 	if(_tank->getTeam()==1)
@@ -59,4 +64,5 @@ void Tank::draw() {
 
 	//release Mem
 	DeleteObject(bkbrush);
+	DeleteObject(bkpen);
 }

@@ -21,6 +21,14 @@ BOOL CALLBACK LogInProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 		case IDC_BUTTON_REG:
 			GetWindowText(usernameText, newname, 20);
 			GetWindowText(passwordText, newpassword, 20);
+			if (newname[0] == '\0') {
+				//MessageBox(hWnd, L"Please input your username", L"Register", MB_OK);
+				break;
+			}
+			if (newpassword[0] == '\0') {
+				//MessageBox(hWnd, L"Please input your password", L"Register", MB_OK);
+				break;
+			}
 			path = TEXT("userfile\\");
 			path += newname;
 			path += L".tankUser";
@@ -34,12 +42,20 @@ BOOL CALLBACK LogInProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 			file.open(path.c_str(), ios::out|ios::app);
 			file << newpassword << endl;
 			username = newname;
-			MessageBox(hWnd, L"Succed", L"Register", MB_OK);
+			//MessageBox(hWnd, L"Succed", L"Register", MB_OK);
 			EndDialog(hWnd, TRUE);
 			break;
 		case IDOK:
 			GetWindowText(usernameText, newname, 20);
 			GetWindowText(passwordText, newpassword, 20);
+			if (newname[0] == '\0') {
+				//MessageBox(hWnd, L"Please input your username", L"Log In", MB_OK);
+				break;
+			}
+			if (newpassword[0] == '\0') {
+				//MessageBox(hWnd, L"Please input your password", L"Log In", MB_OK);
+				break;
+			}
 			path = TEXT("userfile\\");
 			path += newname;
 			path+=L".tankUser";

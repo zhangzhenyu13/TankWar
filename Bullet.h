@@ -19,7 +19,7 @@ public:
 		
 	}
 	Bullet(TankData* owner1,POINT p, Direction d,char team=1, int style1 = 1) 
-		:owner(owner1),group(team),Step(10),x(p.x), y(p.y), direct(d), style(style1) {}
+		:owner(owner1),group(team),Step(4),x(p.x), y(p.y), direct(d), style(style1) {}
 	~Bullet(){
 		if(owner->isAlive()&&hitTank)
 		   owner->LevelUp();

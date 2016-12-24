@@ -30,9 +30,9 @@ void StatusWnd::draw(){
 	SetBkMode(hmem,TRANSPARENT);
 	
 	//Team A
-	TextOut(hmem,0,0,L"WE ARE TEAM A",strlen("WE ARE TEAM A"));
+	TextOut(hmem,0,100,L"WE ARE TEAM A",strlen("WE ARE TEAM A"));
 	for(int i=0;i<5;i++){
-		int x=10,y=50+i*50;
+		int x=10,y=150+i*40;
 		std::string s="LEVEL ";
 		char n='0'+5-i;
 		s.push_back(n);
@@ -44,12 +44,12 @@ void StatusWnd::draw(){
 		MultiByteToWideChar(CP_ACP,0,s.c_str(),s.length(),info,len);
 		TextOut(hmem,x,y,info,len);
 	}
-	Rectangle(hmem,0,320,200,340);
+	Rectangle(hmem,0,370,200,340);
 	//Team B
 	SetTextColor(hmem,RGB(0,0,255));
-	TextOut(hmem,0,350,L"WE ARE TEAM B",strlen("WE ARE TEAM B"));
+	TextOut(hmem,0,400,L"WE ARE TEAM B",strlen("WE ARE TEAM B"));
 	for(int i=0;i<5;i++){
-		int x=10,y=400+i*50;
+		int x=10,y=450+i*40;
 		std::string s="LEVEL ";
 		char n='0'+5-i;
 		s.push_back(n);

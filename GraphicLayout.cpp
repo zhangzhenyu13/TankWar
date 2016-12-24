@@ -32,8 +32,10 @@ void GraphicLayout::draw() {
 		data[i]->draw();
 	}
 	status->draw();
-	if (showStartUP)
-		start->draw();
+	start->mode = showStartUP;
+	start->draw();
+	
+
 	BitBlt(hdc,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,hmem,0,0,SRCCOPY);
 	
 

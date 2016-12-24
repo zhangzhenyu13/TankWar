@@ -11,11 +11,12 @@ using namespace std;
 
 
 void GameAI::BeginGame(){
-	glayout->showStartUP = false;
+	glayout->showStartUP = 1;
 		for(int i=0;i<player.size();i++){
 			player[i]->ShareData(map,&tank);
 		}
 		player[playerRank]->enabled = false;
+		tank[playerRank]->isPlayer = true;
 		//int tanks on screen
 		for (int i = 0,j1=0,j2=0;i < tank.size(); i++) {
 			if (tank[i]->isAlive() == false)
@@ -32,6 +33,46 @@ void GameAI::BeginGame(){
 			else;
 		}
 		
+}
+int GameAI::countLevel() {
+
+	StatusWnd* swnd = glayout->Status();
+	swnd->clear();
+	for (int i = 0; i<tank.size(); i++) {
+		if (tank[i]->isAlive() && tank[i]->available)
+			swnd->add(tank[i]->getTeam(), tank[i]->getLevel());
+	}
+	//count and add
+	int humanop = 0, myAlive = swnd->Sum(2), pcAlive = swnd->Sum(1);
+	for (int i = 0; i < tank.size(); i++) {
+		if (tank[i]->isAlive() == false || tank[i]->available)
+			continue;
+		if (tank[i]->getTeam() == 1 && pcAlive<onShow) {
+			tank[i]->available = true;
+			tank[i]->setPos(properPos(pcArea));
+			pcAlive++;
+		}
+		if (tank[i]->getTeam() == 2 && myAlive<onShow) {
+			tank[i]->available = true;
+			tank[i]->setPos(properPos(myArea));
+			myAlive++;
+			humanop = i;
+		}
+	}
+	if (playerdied&&humanop > 0) {
+		playerRank = humanop;
+		player[humanop]->enabled = false;
+		playerdied = false;
+		tank[playerRank]->isPlayer = true;
+	}
+
+	if (pcAlive == 0)
+		return 1;//pc
+	else if (myAlive == 0)
+		return 2;//my
+	else
+		return 0;
+
 }
 GameResult GameAI::Handle(bool timer) {
 	//robots input imitate
@@ -73,6 +114,7 @@ void GameAI::tankMove() {
 	for (int i = 0;i<tank.size(); i++) {
 		Control* C = control[i];
 		TankData* tank1 = tank[i];
+		tank1->acceptAct(C->getAct());
 		if(tank1->isAlive()==false||tank1->available==false)
 			continue;
 		tank1->tankPos((C->Move()));
@@ -82,59 +124,37 @@ void GameAI::tankMove() {
 			fire.push_back(b);
 			glayout->addGraphicUnit(b);
 		    }
-	/*	for(int j=i+1;j<tank.size();j++)
-	        if(tank[i]->isAlive()&&tank[j]->isAlive()&IntersectRect(&rt,&tank[j]->getPos(),&tank[i]->getPos())) {
-				int Xdis = abs(tank[i]->Xpos() - tank[j]->Xpos()), Ydis = abs(tank[i]->Ypos() - tank[j]->Ypos());
-				if(Xdis > Ydis) {
-					if(tank[i]->moveDirect() == RIGHT || tank[i]->moveDirect() == LEFT)
-						do {
-							tank[i]->stepback();
-						} while(IntersectRect(&rt,&tank[j]->getPos(),&tank[i]->getPos()));
-					if(tank[j]->moveDirect() == RIGHT || tank[j]->moveDirect() == LEFT)
-						do {
-							tank[j]->stepback();
-						} while(IntersectRect(&rt,&tank[j]->getPos(),&tank[i]->getPos()));
-				}
-				else if(Xdis < Ydis) {
-					if(tank[i]->moveDirect() == UP || tank[i]->moveDirect() == DOWN)
-						do {
-							tank[i]->stepback();
-						} while(IntersectRect(&rt,&tank[j]->getPos(),&tank[i]->getPos()));
-					if(tank[j]->moveDirect() == UP || tank[j]->moveDirect() == DOWN)
-						do {
-							tank[j]->stepback();
-						} while(IntersectRect(&rt,&tank[j]->getPos(),&tank[i]->getPos()));
-				}
-		}*/
 	}
 
 //amoung tanks
+	
 		Stack S;
-		for(int i=0;i<tank.size();i++){
-			bool coll=false;
-			if(tank[i]->isAlive()==false||
-				tank[i]->moveDirect()==KEEP||
-				tank[i]->available==false)
+		for (int i = 0; i < tank.size(); i++) {
+			bool coll = false;
+			if (tank[i]->isAlive() == false ||
+				tank[i]->moveDirect() == KEEP ||
+				tank[i]->available == false)
 				continue;
-			for(int j=0;j<tank.size();j++)
-				if(j!=i&&tank[j]->isAlive()&&tank[j]->available&&
-					IntersectRect(&rt,&tank[i]->getPos(),&tank[j]->getPos())){
-					coll=true;
-					
+			for (int j = 0; j < tank.size(); j++)
+				if (j != i&&tank[j]->isAlive() && tank[j]->available&&
+					IntersectRect(&rt, &tank[i]->getPos(), &tank[j]->getPos())) {
+					coll = true;
+
 					break;
 				}
-			if(coll)
+			if (coll)
 				S.push(tank[i]);
 		}
-		
-		while(S.empty()==false){
-			TankData* t=S.top();
+
+		while (S.empty() == false) {
+			TankData* t = S.top();
 			S.pop();
 			t->stepback();
 		}
+
 //tanks and map
 		for(int i=0;i<tank.size();i++){
-			if(tank[i]->isAlive()==false||tank[i]->available==false)
+			if(tank[i]->isAlive()==false||tank[i]->available==false||tank[i]->moveDirect()==KEEP)
 				continue;
 		   // int x = tank[i]->Xpos(), y = tank[i]->Ypos();
 		    RECT rect = tank[i]->getPos();
@@ -143,6 +163,7 @@ void GameAI::tankMove() {
 				tank[i]->stepback();
 			}
 		}
+	
 }
 //
 void GameAI::fireMove() {
@@ -155,7 +176,7 @@ void GameAI::fireMove() {
 		fire[i]->Move();
 		RECT bulletrect = { fire[i]->Xpos()- 2, fire[i]->Ypos() - 2, 
 			               fire[i]->Xpos() + 2, fire[i]->Ypos() + 2 };
-		//map bricks
+	//map bricks
 		for (int j = 0; j < map->size(); j++) {
 			Brick brick = map->getPos(j);
 
@@ -168,10 +189,30 @@ void GameAI::fireMove() {
 				it = fire.begin() + i;
 				fire.erase(it);
 				hitOn=TRUE;
+				i--;
 				break;
 		    }
 		}
 		if(hitOn)
+			continue;
+	//hit other bullets
+		for (int j = i + 1; j < fire.size(); j++)
+			if (fire[j]->getTeam() != fire[i]->getTeam()) {
+				RECT enemyfire = { fire[j]->Xpos() - 2, fire[j]->Ypos() - 2,
+					fire[j]->Xpos() + 2, fire[j]->Ypos() + 2 };
+				if (IntersectRect(&rt, &enemyfire, &bulletrect)) {
+					glayout->deleteGraphicUnit(fire[i]);
+					it = fire.begin() + i;
+					fire.erase(it);
+					glayout->deleteGraphicUnit(fire[j - 1]);
+					it = fire.begin() + j - 1;
+					fire.erase(it);
+					hitOn = TRUE;
+					i--;
+					break;
+				}
+			}
+		if (hitOn)
 			continue;
 	//hit other tanks
 		for(int j=0;j<tank.size();j++){
@@ -189,6 +230,7 @@ void GameAI::fireMove() {
 				it=fire.begin()+i;
 				fire.erase(it);
 				hitOn=TRUE;
+				i--;
 				break;
 			}
 		}
@@ -202,7 +244,27 @@ void GameAI::fireMove() {
 	}
 
 }
-
+POINT GameAI::properPos(RECT Area) {
+	POINT p;
+	RECT rect;
+	bool flag;
+	do {
+		flag = false;
+		p.x = rand() % (Area.right - Area.left) + Area.left;
+		p.y = rand() % (Area.bottom - Area.top) + Area.top;
+		rect.bottom = p.y + 50;
+		rect.left = p.x;
+		rect.right = p.x + 50;
+		rect.top = p.y;
+		RECT inrect;
+		for (int j = 0; j < tank.size(); j++) {
+			RECT trect = { tank[j]->Xpos(), tank[j]->Ypos(), tank[j]->Xpos() + 50, tank[j]->Ypos() + 50 };
+			if (tank[j]->isAlive() && IntersectRect(&inrect, &trect, &rect))
+				flag = true;
+		}
+	} while (map->interset(rect) || flag);
+	return p;
+}
 void GameAI::SaveData(wstring filename) {
 	wfstream file;
 	file.open(filename);

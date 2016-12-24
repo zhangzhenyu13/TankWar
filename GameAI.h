@@ -35,9 +35,9 @@ public :
 	void setGraph(GraphicLayout* g) {
 		glayout = g;
 	}
-	void setArea(RECT rect1,RECT rect2) {
-		myArea = rect1;
-		pcArea = rect2;
+	void setArea(RECT rect1,RECT rect2) {//upArea,downArea of the screen
+		myArea = rect2;
+		pcArea = rect1;
 	}
 	void setDifficulty(int r) {
 		level = r;
@@ -61,6 +61,9 @@ public :
 
 	//
 	void BeginGame();
+	void EndGame() {
+		glayout->showStartUP = 2;
+	}
 	~GameAI(){
 		for(int i=tank.size()-1;i>=0;i--){
 			delete tank[i];
@@ -73,66 +76,10 @@ public :
 			delete player[i];
 		}
 	}
-	POINT properPos(RECT Area){
-		POINT p;
-		RECT rect;
-		bool flag;
-		do {
-			flag = false;
-			p.x = rand()%(Area.right-Area.left)+Area.left;
-			p.y = rand()%(Area.bottom-Area.top)+Area.top;
-			rect.bottom = p.y + 50;
-			rect.left = p.x;
-			rect.right = p.x + 50;
-			rect.top = p.y;
-			RECT inrect;
-			for(int j = 0; j < tank.size(); j++) {
-				RECT trect = {tank[j]->Xpos(), tank[j]->Ypos(), tank[j]->Xpos()+50, tank[j]->Ypos()+50};
-				if (tank[j]->isAlive()&&IntersectRect(&inrect,&trect,&rect))
-					flag = true;
-			}
-		} while(map->interset(rect) || flag);
-		return p;
-	}
+	POINT properPos(RECT Area);
 	void SaveData(wstring );
 protected:
-	int countLevel(){
-		
-		StatusWnd* swnd=glayout->Status();
-		swnd->clear();
-		for(int i=0;i<tank.size();i++){
-			if(tank[i]->isAlive()&&tank[i]->available)
-			swnd->add(tank[i]->getTeam(),tank[i]->getLevel());
-		}
-		//count and add
-		int humanop = 0, myAlive = swnd->Sum(2), pcAlive = swnd->Sum(1);
-		for (int i = 0; i < tank.size(); i++) {
-			if (tank[i]->isAlive() == false||tank[i]->available)
-				continue;
-			if (tank[i]->getTeam() == 1&&pcAlive<onShow) {
-				tank[i]->available = true;
-				pcAlive++;
-			}
-			if(tank[i]->getTeam()==2&&myAlive<onShow){
-				tank[i]->available = true;
-				myAlive++;
-				humanop = i;
-			}
-		}
-		if (playerdied&&humanop > 0) {
-			playerRank = humanop;
-			player[humanop]->enabled = false;
-			playerdied = false;
-		}
-		
-		if(pcAlive==0)
-			return 1;//pc
-		else if(myAlive==0)
-			return 2;//my
-		else
-			return 0;
-
-	}
+	int countLevel();
 	void fireMove();
 	void tankMove();
 

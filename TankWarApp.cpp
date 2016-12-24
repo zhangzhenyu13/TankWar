@@ -14,7 +14,6 @@ case WM_PAINT, case WM_KEYDOWN
 SelectData myMode;
 wstring path = L"userfile\\";
 wstring username;
-wstring password;
 static TankFactory *mytkfc,*pctkfc;
 static HINSTANCE hInst;
 static Control* Input;
@@ -96,6 +95,21 @@ BOOLEAN InitData(HWND& hWnd) {
 }
 
 BOOLEAN ContinueGame(HWND& hWnd, wstring filename) {
+	wfstream file;
+	file.open(filename, ios::in);
+	file.seekp(20, ios::beg);
+	int x=9999, y, team, level;
+	file >> x;
+	if (x == 9999)
+		return FALSE;
+	
+	//releasedata
+	options.clear();
+	delete mytkfc;
+	delete pctkfc;
+	delete RuleAI;
+	delete Layout;
+
 	mytkfc = new TankFactory(2);
 	pctkfc = new TankFactory(1);
 	Robot::hcode = 0;
@@ -109,11 +123,6 @@ BOOLEAN ContinueGame(HWND& hWnd, wstring filename) {
 	Layout->addStartUp(Startwnd);
 
 	//tank
-	wfstream file;
-	file.open(filename, ios::in);
-	file.seekp(20, ios::beg);
-	int x, y, team, level;
-	file >> x;
 	while (x != 11457680) {
 		file >> y >> team >> level;
 		tankData = new TankData(x, y, team, level);
@@ -215,7 +224,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (wParam == VK_ESCAPE) {
 			KillTimer(hWnd, 1);
 			MessageBox(NULL, L"Pause", L"Pause", MB_OK);
-			SetTimer(hWnd, 1, 20, NULL);
+			SetTimer(hWnd, 1, 5, NULL);
 		}
 		Input = RuleAI->getPlayerInput();
 		Input->Input(wParam);
@@ -251,6 +260,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case GAME_EXIT:
 			KillTimer(hWnd, 1);
+			RuleAI->EndGame();
+			InvalidateRect(hWnd,NULL,FALSE);
+			Sleep(2000);
 			PostQuitMessage(0);
 			break;
 		case GAME_NEW:
@@ -260,7 +272,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				Release();
 				InitData(hWnd);
 				RuleAI->BeginGame();
-				SetTimer(hWnd, 1, 20, NULL);
+				SetTimer(hWnd, 1, 5, NULL);
 				InvalidateRect(hWnd,NULL,FALSE);
 			}
 			else
@@ -268,13 +280,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				
 			break;
 		case GAME_LOG:
+			if (username.length() != 0) {
+				MessageBox(hWnd, L"You have already logged in", L"Log In", MB_OK);
+				break;
+			}
 			DialogBox(hInst, (LPCWSTR)IDD_DIALOG_LOGIN, NULL, LogInProc);
-			path = L"userfile\\";
 			path += username;
 			if (path.length() == 9)
 				path += L"passenger.txt";
 			else
 				path += L".tankUser";
+			break;
+		case GAME_LOGOUT:
+			if (username.length() == 0) {
+				MessageBox(hWnd, L"You have not logged in yet", L"Log Out", MB_OK);
+				break;
+			}
+			username = L"";
+			path = L"userfile\\";
+			MessageBox(hWnd, L"Succeed", L"Log Out", MB_OK);
 			break;
 		case GAME_SAVE:
 			if (path.length() == 9) {
@@ -287,21 +311,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			KillTimer(hWnd, 1);
 			if (path.length() == 9)
 				path += L"passenger.txt";
-			Release();
-			ContinueGame(hWnd, path);
+			if (ContinueGame(hWnd, path) == FALSE) {
+				MessageBox(hWnd, L"No record", L"CONTINUE", MB_OK);
+				break;
+			}
 			RuleAI->BeginGame();
-			SetTimer(hWnd, 1, 20, NULL);
+			SetTimer(hWnd, 1, 5, NULL);
 			InvalidateRect(hWnd, NULL, FALSE);
 			break;
 		case GAME_ABOUT:
 			KillTimer(hWnd, 1);
 			MessageBox(NULL, L"TankWar\nDeveloped by\n	Zhang Zhenyu\n	Liu Ziteng\n	Zhang Shuowen\n	Hou Bonan", L"ABOUT", MB_OK);
-			SetTimer(hWnd, 1, 20, NULL);
+			SetTimer(hWnd, 1, 5, NULL);
 			break;
 		case GAME_HELP:
 			KillTimer(hWnd, 1);
 			MessageBox(NULL, L"Press UP/DOWN/LEFT/RIGHT to move\nPress SPACE to fire\nPress ESC to pause", L"HELP", MB_OK);
-			SetTimer(hWnd, 1, 20, NULL);
+			SetTimer(hWnd, 1, 5, NULL);
 			break;
 		default:
 			break;

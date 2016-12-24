@@ -68,10 +68,6 @@ public:
 		if (--firecooling > 0) {
 			isfire = 0;
 		}
-		/*if (--movecooling <= 0) {
-			direct = KEEP;
-			movecooling = 0;
-		}*/
 		
 	}
 	//stop

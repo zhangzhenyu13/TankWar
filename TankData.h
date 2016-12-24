@@ -18,11 +18,12 @@ public:
 	int levelUPcooling;
 	bool available;
 	const int tankSize = 40;
+	bool isPlayer = false;
 	RECT viewArea(){
 		RECT rect={posx-100,posy-100,posx+100,posy+100};
 		return rect;
 	}
-	TankData(int x, int y, int team, int newlevel) :Step(5) {
+	TankData(int x, int y, int team, int newlevel) :Step(2) {
 		levelUPcooling = 0;
 		level = newlevel;
 		group = team;
@@ -33,7 +34,7 @@ public:
 		posy = y;
 		available = false;
 	}
-	TankData():Step(5) {
+	TankData():Step(2) {
 		levelUPcooling = 0;
 		level=1;
 		group=1;
@@ -45,7 +46,7 @@ public:
 		available = false;
 		
 	}
-	TankData(POINT p):Step(5){
+	TankData(POINT p):Step(2){
 		levelUPcooling = 0;
 		level=1;
 		group=1;
@@ -61,6 +62,8 @@ public:
 	}
 	char getTeam(){return group;}
 	bool HitByBullet(char damage=1){//is the tank dead?
+		if (levelUPcooling > 0)
+			return false;
 		health-=damage;
 		if (isAlive())
 			return false;
@@ -78,13 +81,13 @@ public:
 		if(level>=5)
 			return ;
 		if(++count>levelStand){
-			levelStand+=2;
-			count=0;
+		count=0;
 		level++;
 		health=level;
 		if((1+level)%3==0)
 			Step++;
 		levelUPcooling = level * 400;
+		levelStand = level * 2 - 1;
 		}
 	}
 	bool isAlive(){
@@ -95,6 +98,10 @@ public:
 	}
 	POINT fire() {
 	POINT p;
+	if (isfire == false) {
+		p = {-1,-1};
+		return p;
+	}
 	switch(gesdirect){
 	case UP:
 		p.x=posx + tankSize/2;
@@ -151,7 +158,7 @@ public:
 	}
 	void stepback() {
 	
-		switch (movedirect)
+		switch (gesdirect)
 		{
 		case UP:
 			posy += Step;

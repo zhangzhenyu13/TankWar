@@ -8,7 +8,7 @@ class StartUpWnd :public GraphicUnit {
 	HDC* pDC, *pDCObj;
 	std::string mapname;
 public:
-
+	char mode = 0;//0,1,2
 	void setHandle(HWND*hWnd, HINSTANCE*hInst) {
 		this->pWnd = hWnd;
 		this->pInst = hInst;

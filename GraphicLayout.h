@@ -14,7 +14,7 @@ private:
 protected:
 	
 public:
-	bool showStartUP=true;
+	char showStartUP=0;//0 start,1 game, 2 end
 	void RefreshWnd(HWND wnd) {
 		pWnd = wnd;
 	}
